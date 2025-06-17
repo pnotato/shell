@@ -18,11 +18,12 @@ void shell() {
 
     // Current Working Directory
     cwd_ptr = getcwd(cwd_buf, cwd_size);
-
+      
     if (cwd_ptr == NULL) {
-      printf("shell: unable to get current directory");
+      printf("shell: unable to get current directory")
       cwd_ptr = "";
     }
+
 
     printf("%s$ ", cwd_ptr);
     nread = getline(&current_line, &len, stdin);

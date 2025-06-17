@@ -1,0 +1,11 @@
+{"version": 2, "width": 122, "height": 46, "timestamp": 1750193577, "idle_time_limit": 5.0, "env": {"SHELL": "/usr/bin/zsh", "TERM": "xterm-256color"}}
+[0.060399, "o", "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                         \r \r"]
+[0.060745, "o", "\u001b]2;cmpt201@10360e5d85f7:~/units/04-long-assignments/a8-pnotato\u0007\u001b]1;..ts/a8-pnotato\u0007"]
+[0.061787, "o", "\u001b]7;file://10360e5d85f7/home/cmpt201/units/04-long-assignments/a8-pnotato\u001b\\"]
+[0.071411, "o", "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[recording] \u001b[34m~/units/04-long-assignments/a8-pnotato\u001b[32m❯\u001b[39m \u001b[K"]
+[0.07164, "o", "\u001b[?1h\u001b=\u001b[?2004h"]
+[1.884056, "i", "e"]
+[1.886598, "o", "e"]
+[1.890348, "o", "\b\u001b[1m\u001b[31me\u001b[0m\u001b[39m\b\u001b[1m\u001b[31me\u001b[0m\u001b[39m\u001b[92mxit\u001b[39m\b\b\b"]
+[2.059116, "i", "x"]
+[2.059922, "o", "\b\u001b[1m\u001b[31me\u001b[1m\u001b[31mx\u001b[0m\u001b[39m"]

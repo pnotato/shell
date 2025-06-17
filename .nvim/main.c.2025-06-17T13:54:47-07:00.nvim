@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <unistd.h>
 
+
+
+
 void shell() {
   char *current_line = NULL;
   size_t len = 0;
@@ -11,20 +14,11 @@ void shell() {
 
   // Variables for cwd
   long cwd_size;
-  char *cwd_buf;
-  char *cwd_ptr;
+  char* buf;
+  char* ptr;
 
   while (true) {
-
-    // Current Working Directory
-    cwd_ptr = getcwd(cwd_buf, cwd_size);
-
-    if (cwd_ptr == NULL) {
-      printf("shell: unable to get current directory");
-      cwd_ptr = "";
-    }
-
-    printf("%s$ ", cwd_ptr);
+    char *working = printf("Shell $ ");
     nread = getline(&current_line, &len, stdin);
     printf("%s\n", current_line);
   }
