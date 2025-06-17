@@ -1,0 +1,26 @@
+#define _GNU_SOURCE
+#include "../include/msgs.h"
+#include <stdbool.h>
+#include <stdio.h>
+
+void shell() {
+  char *current_line = NULL;
+  size_t len = 0;
+  ssize_t nread;
+
+  while (true) {
+    printf("Shell $ ");
+    nread = getline(&current_line, &len, stdin);
+    printf("%s\n", current_line);
+  }
+}
+
+// Foreground Execution
+
+// Background Execution
+
+int main() {
+  printf("Hello, World!");
+  shell();
+  return 0;
+}
