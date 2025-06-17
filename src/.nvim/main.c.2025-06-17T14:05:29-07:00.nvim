@@ -23,8 +23,7 @@ void shell() {
       printf("shell: unable to get current directory");
       cwd_ptr = "";
     }
-    printf("%s$ ",
-           cwd_ptr); // For reference, this is the shell path that's printed
+    printf("%s$ ", cwd_ptr); // For reference, this is the shell path that's printed
     nread = getline(&current_line, &len, stdin);
     printf("%s\n", current_line);
   }
