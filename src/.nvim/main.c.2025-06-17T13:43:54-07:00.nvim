@@ -2,10 +2,6 @@
 #include "../include/msgs.h"
 #include <stdbool.h>
 #include <stdio.h>
-#include <unistd.h>
-
-
-
 
 void shell() {
   char *current_line = NULL;
@@ -13,7 +9,8 @@ void shell() {
   ssize_t nread;
 
   while (true) {
-    char *working = printf("Shell $ ");
+    char* working =
+    printf("Shell $ ");
     nread = getline(&current_line, &len, stdin);
     printf("%s\n", current_line);
   }
