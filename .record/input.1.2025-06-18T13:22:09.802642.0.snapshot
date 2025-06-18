@@ -1,0 +1,13 @@
+{"version": 2, "width": 123, "height": 46, "timestamp": 1750278129, "idle_time_limit": 5.0, "env": {"SHELL": "/usr/bin/zsh", "TERM": "xterm-256color"}}
+[0.324159, "o", "[oh-my-zsh] Would you like to update? [Y/n] "]
+[5.632252, "i", "n"]
+[5.632628, "o", "n"]
+[5.632698, "o", "\r\n"]
+[5.634284, "o", "[oh-my-zsh] You can update manually by running `omz update`\r\n"]
+[5.717438, "o", "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                          \r \r"]
+[5.717635, "o", "\u001b]2;cmpt201@10360e5d85f7:~/units/04-long-assignments/a8-pnotato\u0007\u001b]1;..ts/a8-pnotato\u0007"]
+[5.719007, "o", "\u001b]7;file://10360e5d85f7/home/cmpt201/units/04-long-assignments/a8-pnotato\u001b\\"]
+[5.729919, "o", "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[recording] \u001b[34m~/units/04-long-assignments/a8-pnotato\u001b[32m❯\u001b[39m \u001b[K"]
+[5.730257, "o", "\u001b[?1h\u001b=\u001b[?2004h"]
+[8.618698, "i", "m"]
+[8.621823, "o", "m"]
