@@ -1,11 +1,11 @@
 #define _GNU_SOURCE
 #include "../include/msgs.h"
-#include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
+#include <errno.h>
 
 void shell() {
   char *current_line = NULL;
@@ -29,28 +29,33 @@ void shell() {
     printf("%s$ ",
            cwd_ptr); // For reference, this is the shell path that's printed
     nread = getline(&current_line, &len, stdin);
-    // printf("%s\n", current_line);
+    //printf("%s\n", current_line);
+    
+    
+  // NEED A FREE FOR THE LINE THATS PASSED TO RUN_LINE
 
-    // NEED A FREE FOR THE LINE THATS PASSED TO RUN_LINE
+      
   }
 }
 
 // Foreground Execution
-void run_line(char *line) {
-  char *commands[4096]; // CHANGE THIS LATER ON
-  char *saveptr;
-  char *token = strtok_r(line, " ", &saveptr);
+void run_line(char* line) {
+  char* commands[4096]; // CHANGE THIS LATER ON 
+  char* saveptr;
+  char* token = strtok_r(line, " ", &saveptr);
   int i = 0;
 
   while (token != NULL) {
     commands[i++] = token;
     token = strtok_r(NULL, " ", &saveptr);
   }
-
-  pid_t pid = fork();
+ 
+  pid_t pid = fork(); 
 
   if (pid == -1)
 }
+
+
 
 // Background Execution
 
