@@ -5,8 +5,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/wait.h>
 #include <unistd.h>
+#include <sys/wait.h>
+
+
+
+
 
 void shell() {
   char *current_line = NULL;
@@ -51,15 +55,17 @@ void run_line(char *line) {
   pid_t pid = fork();
 
   if (pid == -1) {
-    char *err = "shell: unable to fork";
-    write(STDERR_FILENO, err, strlen(err)); // MAYBE CHANGE TO OUT?
+    char* err = "shell: unable to fork";
+    write(STDERR_FILENO, err, strlen(err)); // MAYBE CHANGE TO OUT? 
     exit(1);
-  } else if (pid == 0) {
-    if (execl(
-  } else {
+  }
+  else if (pid == 0) {
+    if (execl( 
+  }
+  else {
     int wstatus = 0;
     if (waitpid(pid, &wstatus, 0) == -1) {
-      char *err = "shell: unable to wait for child";
+      char* err = "shell: unable to wait for child";
       write(STDERR_FILENO, err, strlen(err));
       exit(1);
     }
