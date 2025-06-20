@@ -75,12 +75,14 @@ void run_line(char *line) {
 
   } else {
     int wstatus = 0;
-    if (is_background) {
-      printf("DEBUG: BACKGROUND MODE IS ON");
-    }
-    if (waitpid(pid, &wstatus, 0) == -1) {
-      char *err = "shell: unable to wait for child\n";
-      write(STDERR_FILENO, err, strlen(err));
+    //   if (is_background) {
+    //     printf("DEBUG: BACKGROUND MODE IS ON");
+    //    }
+    if (!is_background) {
+      if (waitpid(pid, &wstatus, 0) == -1) {
+        char *err = "shell: unable to wait for child\n";
+        write(STDERR_FILENO, err, strlen(err));
+      }
     }
   }
 }
