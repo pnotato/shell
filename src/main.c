@@ -9,6 +9,7 @@
 #include <unistd.h>
 
 void run_line(char *line);
+void kill_zombies();
 
 void shell() {
   char *current_line = NULL;
@@ -75,15 +76,22 @@ void run_line(char *line) {
 
   } else {
     int wstatus = 0;
-    //   if (is_background) {
-    //     printf("DEBUG: BACKGROUND MODE IS ON");
-    //    }
     if (!is_background) {
       if (waitpid(pid, &wstatus, 0) == -1) {
         char *err = "shell: unable to wait for child\n";
         write(STDERR_FILENO, err, strlen(err));
       }
+      kill_zombies();
     }
+  }
+}
+
+// kills all currently running child processes.
+// DEBUG: Check over later.
+void kill_zombies() {
+  int wstatus;
+  while (waitpid(-1, &wstatus, WNOHANG) > 0) {
+    continue;
   }
 }
 
