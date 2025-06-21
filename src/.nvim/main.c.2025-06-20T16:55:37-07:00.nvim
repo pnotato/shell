@@ -1,7 +1,6 @@
 #define _GNU_SOURCE
 #include "../include/msgs.h"
 #include <errno.h>
-#include <limits.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,12 +17,13 @@ void shell() {
   ssize_t nread;
 
   // Variables for cwd
-  char cwd_buf[PATH_MAX];
+  long cwd_size = 0;
+  char cwd_buf[4096];
 
   while (true) {
 
     // Current Working Directory and shell stuff
-    char *cwd_ptr = getcwd(cwd_buf, sizeof(cwd_buf));
+    char *cwd_ptr = getcwd(cwd_buf, cwd_size);
 
     if (cwd_ptr == NULL) {
       printf("shell: unable to get current directory\n");
@@ -59,16 +59,12 @@ void run_line(char *line) {
     commands[i] = NULL;
   };
 
-  if (commands[0] == NULL) {
-    return;
-  } // Checks if the array is empty. if it is, immediately return
-
   pid_t pid = fork();
 
   if (pid == -1) {
     char *err = "shell: unable to fork\n";
     write(STDERR_FILENO, err, strlen(err)); // MAYBE CHANGE TO OUT?
-  } else if (pid == 0 && commands[0] != NULL) {
+  } else if (pid == 0) {
 
     if (execvp(commands[0], commands) == -1) {
       // I think we use execvp so a path doesn't need to be specified
@@ -81,8 +77,7 @@ void run_line(char *line) {
     int wstatus = 0;
     if (!is_background) {
       if (waitpid(pid, &wstatus, 0) == -1) {
-        // char *err = "shell: unable to wait for child\n";
-        const char *err = FORMAT_MSG("shell", WAIT_ERROR_MSG);
+        char *err = "shell: unable to wait for child\n";
         write(STDERR_FILENO, err, strlen(err));
       }
       kill_zombies();

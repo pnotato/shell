@@ -60,8 +60,9 @@ void run_line(char *line) {
   };
 
   if (commands[0] == NULL) {
+    printf("DEBUG: NULL");
     return;
-  } // Checks if the array is empty. if it is, immediately return
+  }
 
   pid_t pid = fork();
 

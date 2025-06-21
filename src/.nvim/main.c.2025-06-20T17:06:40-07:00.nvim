@@ -59,10 +59,6 @@ void run_line(char *line) {
     commands[i] = NULL;
   };
 
-  if (commands[0] == NULL) {
-    return;
-  } // Checks if the array is empty. if it is, immediately return
-
   pid_t pid = fork();
 
   if (pid == -1) {
