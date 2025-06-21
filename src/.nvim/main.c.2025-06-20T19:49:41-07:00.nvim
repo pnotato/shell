@@ -21,7 +21,6 @@ void shell() {
   char current_line[MAX_COMMAND_SIZE];
   char cwd_buf[PATH_MAX];
   char cwd_prev[PATH_MAX];
-  char *cwd_prev_ptr = cwd_prev;
 
   while (true) {
     // Current Working Directory and shell stuff
@@ -45,13 +44,14 @@ void shell() {
     }
     current_line[command_size] = '\0';
 
-    run_line(current_line, cwd_ptr, cwd_prev_ptr);
+    debug(cwd_prev);
+    run_line(current_line, cwd_ptr, cwd_prev);
     // NEED A FREE FOR THE LINE THATS PASSED TO RUN_LINE
   }
 }
 
 // Foreground Execution
-void run_line(char *line, char *cwd, char *cwd_prev_ptr) {
+void run_line(char *line, char *cwd, char *cwd_prev) {
   char *commands[4096]; // CHANGE THIS LATER ON
   memset(commands, 0, sizeof(commands));
   char *saveptr;
@@ -125,7 +125,7 @@ void run_line(char *line, char *cwd, char *cwd_prev_ptr) {
       new_path = new_path_buf;
     } else if (strcmp(commands[1], "-") == 0) {
       debug("BACK");
-      new_path = cwd_prev_ptr;
+      new_path = cwd_prev;
     } else {
       debug("FALLBACK");
       new_path = commands[1];
@@ -133,7 +133,7 @@ void run_line(char *line, char *cwd, char *cwd_prev_ptr) {
 
     // Actual running of path
     if (chdir(new_path) == 0) {
-      snprintf(cwd_prev_ptr, PATH_MAX, "%s", cwd);
+      cwd_prev = cwd;
       return;
     } else {
       const char *err = FORMAT_MSG("cd", CHDIR_ERROR_MSG);

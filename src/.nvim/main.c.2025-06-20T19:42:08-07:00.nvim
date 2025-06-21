@@ -11,7 +11,7 @@
 
 #define MAX_COMMAND_SIZE 4096
 
-void run_line(char *line, char *cwd, char *cwd_prev);
+void run_line(char *line, char *cwd_prev);
 void kill_zombies();
 
 void debug(char *line) { write(STDERR_FILENO, line, strlen(line)); }
@@ -21,7 +21,6 @@ void shell() {
   char current_line[MAX_COMMAND_SIZE];
   char cwd_buf[PATH_MAX];
   char cwd_prev[PATH_MAX];
-  char *cwd_prev_ptr = cwd_prev;
 
   while (true) {
     // Current Working Directory and shell stuff
@@ -45,13 +44,13 @@ void shell() {
     }
     current_line[command_size] = '\0';
 
-    run_line(current_line, cwd_ptr, cwd_prev_ptr);
+    run_line(current_line, cwd_prev);
     // NEED A FREE FOR THE LINE THATS PASSED TO RUN_LINE
   }
 }
 
 // Foreground Execution
-void run_line(char *line, char *cwd, char *cwd_prev_ptr) {
+void run_line(char *line, char *cwd_prev) {
   char *commands[4096]; // CHANGE THIS LATER ON
   memset(commands, 0, sizeof(commands));
   char *saveptr;
@@ -124,63 +123,66 @@ void run_line(char *line, char *cwd, char *cwd_prev_ptr) {
       snprintf(new_path_buf, sizeof(new_path_buf), "/home%s", commands[1] + 1);
       new_path = new_path_buf;
     } else if (strcmp(commands[1], "-") == 0) {
-      debug("BACK");
-      new_path = cwd_prev_ptr;
-    } else {
-      debug("FALLBACK");
-      new_path = commands[1];
-    }
 
-    // Actual running of path
-    if (chdir(new_path) == 0) {
-      snprintf(cwd_prev_ptr, PATH_MAX, "%s", cwd);
-      return;
-    } else {
-      const char *err = FORMAT_MSG("cd", CHDIR_ERROR_MSG);
-      write(STDERR_FILENO, err, strlen(err));
-    }
-  } else if (strcmp(commands[0], "help") == 0) {
-  }
-
-  else {
-
-    // If no internal command is run, continue with fork.
-    pid_t pid = fork();
-    if (pid == -1) {
-      const char *err = FORMAT_MSG("shell", FORK_ERROR_MSG);
-      write(STDERR_FILENO, err, strlen(err)); // MAYBE CHANGE TO OUT?
-    } else if (pid == 0 && commands[0] != NULL) {
-      if (execvp(commands[0], commands) == -1) {
-        // I think we use execvp so a path doesn't need to be specified
-        // also because our arguments are in an array
-        const char *err = FORMAT_MSG("shell", EXEC_ERROR_MSG);
-        write(STDERR_FILENO, err, strlen(err));
+      snprintf(new_path_buf, sizeof(new_path_buf), "%s", cwd_prev);
+      new_path = new_path_buf;
       }
-    } else {
-      int wstatus = 0;
-      if (!is_background) {
-        if (waitpid(pid, &wstatus, 0) == -1) {
-          // char *err = "shell: unable to wait for child\n";
-          const char *err = FORMAT_MSG("shell", WAIT_ERROR_MSG);
+        else {
+          debug("FALLBACK");
+          new_path = commands[1];
+        }
+
+        // Actual running of path
+        if (chdir(new_path) == 0) {
+          snprintf(cwd_prev, sizeof(cwd_prev), "%s", new_path);
+          return;
+        } else {
+          const char *err = FORMAT_MSG("cd", CHDIR_ERROR_MSG);
           write(STDERR_FILENO, err, strlen(err));
         }
       }
+      else if (strcmp(commands[0], "help") == 0) {
+      }
+
+      else {
+
+        // If no internal command is run, continue with fork.
+        pid_t pid = fork();
+        if (pid == -1) {
+          const char *err = FORMAT_MSG("shell", FORK_ERROR_MSG);
+          write(STDERR_FILENO, err, strlen(err)); // MAYBE CHANGE TO OUT?
+        } else if (pid == 0 && commands[0] != NULL) {
+          if (execvp(commands[0], commands) == -1) {
+            // I think we use execvp so a path doesn't need to be specified
+            // also because our arguments are in an array
+            const char *err = FORMAT_MSG("shell", EXEC_ERROR_MSG);
+            write(STDERR_FILENO, err, strlen(err));
+          }
+        } else {
+          int wstatus = 0;
+          if (!is_background) {
+            if (waitpid(pid, &wstatus, 0) == -1) {
+              // char *err = "shell: unable to wait for child\n";
+              const char *err = FORMAT_MSG("shell", WAIT_ERROR_MSG);
+              write(STDERR_FILENO, err, strlen(err));
+            }
+          }
+        }
+      }
     }
-  }
-}
 
-// kills all currently running child processes.
-// DEBUG: Check over later.
-void kill_zombies() {
-  int wstatus;
-  while (waitpid(-1, &wstatus, WNOHANG) > 0) {
-    continue;
-  }
-}
+    // kills all currently running child processes.
+    // DEBUG: Check over later.
+    void kill_zombies() {
+      int wstatus;
+      while (waitpid(-1, &wstatus, WNOHANG) > 0) {
+        continue;
+      }
+    }
 
-// Background Execution
+    // Background Execution
 
-int main() {
-  shell();
-  return 0;
-}
+    int main() {
+      shell();
+      return 0;
+    }

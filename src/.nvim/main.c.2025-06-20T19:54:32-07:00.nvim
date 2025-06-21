@@ -125,6 +125,7 @@ void run_line(char *line, char *cwd, char *cwd_prev_ptr) {
       new_path = new_path_buf;
     } else if (strcmp(commands[1], "-") == 0) {
       debug("BACK");
+      write(STDERR_FILENO, *cwd_prev_ptr, sizeof(*cwd_prev_ptr));
       new_path = cwd_prev_ptr;
     } else {
       debug("FALLBACK");
@@ -133,7 +134,7 @@ void run_line(char *line, char *cwd, char *cwd_prev_ptr) {
 
     // Actual running of path
     if (chdir(new_path) == 0) {
-      snprintf(cwd_prev_ptr, PATH_MAX, "%s", cwd);
+      cwd_prev_ptr = cwd;
       return;
     } else {
       const char *err = FORMAT_MSG("cd", CHDIR_ERROR_MSG);
