@@ -52,7 +52,6 @@ void shell() {
 // Foreground Execution
 void run_line(char *line, char *cwd_prev) {
   char *commands[4096]; // CHANGE THIS LATER ON
-  memset(commands, 0, sizeof(commands));
   char *saveptr;
   char *token = strtok_r(line, " \n", &saveptr);
   int i = 0;
@@ -109,19 +108,15 @@ void run_line(char *line, char *cwd_prev) {
     // char cwd_buf[PATH_MAX];
     // char *cwd_ptr = getcwd(cwd_buf, sizeof(cwd_buf));
     char *new_path;
-    char new_path_buf[PATH_MAX];
     if (commands[2] != NULL) {
       const char *err = FORMAT_MSG("cd", TMA_MSG);
-      write(STDERR_FILENO, err, strlen(err));
     }
     if (commands[1] == NULL || strcmp(commands[1], "~") == 0) {
       debug("NULL PRINTED");
       new_path = "/home";
     } else if (commands[1][0] == '~') {
-      // DEBUG: This still causes a warning, but should be safe.
-      // Check later in case of memory leak.
-      snprintf(new_path_buf, sizeof(new_path_buf), "/home%s", commands[1] + 1);
-      new_path = new_path_buf;
+      new_path = "/home";
+      debug("YAY");
     } else {
       debug("FALLBACK");
       new_path = commands[1];
@@ -129,7 +124,6 @@ void run_line(char *line, char *cwd_prev) {
 
     // Actual running of path
     if (chdir(new_path) == 0) {
-      strncpy(cwd_prev, new_path, PATH_MAX);
       return;
     } else {
       const char *err = FORMAT_MSG("cd", CHDIR_ERROR_MSG);

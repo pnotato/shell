@@ -11,16 +11,16 @@
 
 #define MAX_COMMAND_SIZE 4096
 
-void run_line(char *line, char *cwd_prev);
+void run_line(char *line);
 void kill_zombies();
 
 void debug(char *line) { write(STDERR_FILENO, line, strlen(line)); }
 
 void shell() {
-  // Variables for cwd
   char current_line[MAX_COMMAND_SIZE];
+
+  // Variables for cwd
   char cwd_buf[PATH_MAX];
-  char cwd_prev[PATH_MAX];
 
   while (true) {
     // Current Working Directory and shell stuff
@@ -44,21 +44,18 @@ void shell() {
     }
     current_line[command_size] = '\0';
 
-    run_line(current_line, cwd_prev);
+    run_line(current_line);
     // NEED A FREE FOR THE LINE THATS PASSED TO RUN_LINE
   }
 }
 
 // Foreground Execution
-void run_line(char *line, char *cwd_prev) {
+void run_line(char *line) {
   char *commands[4096]; // CHANGE THIS LATER ON
-  memset(commands, 0, sizeof(commands));
   char *saveptr;
   char *token = strtok_r(line, " \n", &saveptr);
   int i = 0;
   bool is_background = false;
-
-  kill_zombies();
 
   while (token != NULL) {
     commands[i++] = token;
@@ -87,81 +84,41 @@ void run_line(char *line, char *cwd_prev) {
       return;
     }
   } else if (strcmp(commands[0], "pwd") == 0) {
+    char current_line[MAX_COMMAND_SIZE];
     char cwd_buf[PATH_MAX];
     char *cwd_ptr = getcwd(cwd_buf, sizeof(cwd_buf));
-    const char *escape = "\n";
 
     if (cwd_ptr == NULL) {
       const char *err = FORMAT_MSG("pwd", GETCWD_ERROR_MSG);
       write(STDERR_FILENO, err, strlen(err));
+      cwd_ptr = "";
       return;
     }
-    if (commands[1] != NULL) {
-      const char *err = FORMAT_MSG("pwd", TMA_MSG);
-      write(STDERR_FILENO, err, strlen(err));
-      return;
-    }
-    write(STDOUT_FILENO, cwd_ptr, strlen(cwd_ptr));
-    write(STDOUT_FILENO, escape, strlen(escape));
-
+    write(STDOUT_FILENO, cwd_ptr, strlen(cwd_ptr)); // For reference, this is the shell path that's printed  
     return;
-  } else if (strcmp(commands[0], "cd") == 0) {
-    // char cwd_buf[PATH_MAX];
-    // char *cwd_ptr = getcwd(cwd_buf, sizeof(cwd_buf));
-    char *new_path;
-    char new_path_buf[PATH_MAX];
-    if (commands[2] != NULL) {
-      const char *err = FORMAT_MSG("cd", TMA_MSG);
+    }
+
+  // If no internal command is run, continue with fork.
+  pid_t pid = fork();
+  if (pid == -1) {
+    const char *err = FORMAT_MSG("shell", FORK_ERROR_MSG);
+    write(STDERR_FILENO, err, strlen(err)); // MAYBE CHANGE TO OUT?
+  } else if (pid == 0 && commands[0] != NULL) {
+    if (execvp(commands[0], commands) == -1) {
+      // I think we use execvp so a path doesn't need to be specified
+      // also because our arguments are in an array
+      const char *err = FORMAT_MSG("shell", EXEC_ERROR_MSG);
       write(STDERR_FILENO, err, strlen(err));
     }
-    if (commands[1] == NULL || strcmp(commands[1], "~") == 0) {
-      debug("NULL PRINTED");
-      new_path = "/home";
-    } else if (commands[1][0] == '~') {
-      // DEBUG: This still causes a warning, but should be safe.
-      // Check later in case of memory leak.
-      snprintf(new_path_buf, sizeof(new_path_buf), "/home%s", commands[1] + 1);
-      new_path = new_path_buf;
-    } else {
-      debug("FALLBACK");
-      new_path = commands[1];
-    }
-
-    // Actual running of path
-    if (chdir(new_path) == 0) {
-      strncpy(cwd_prev, new_path, PATH_MAX);
-      return;
-    } else {
-      const char *err = FORMAT_MSG("cd", CHDIR_ERROR_MSG);
-      write(STDERR_FILENO, err, strlen(err));
-    }
-
-  } else if (strcmp(commands[0], "help") == 0) {
-  }
-
-  else {
-
-    // If no internal command is run, continue with fork.
-    pid_t pid = fork();
-    if (pid == -1) {
-      const char *err = FORMAT_MSG("shell", FORK_ERROR_MSG);
-      write(STDERR_FILENO, err, strlen(err)); // MAYBE CHANGE TO OUT?
-    } else if (pid == 0 && commands[0] != NULL) {
-      if (execvp(commands[0], commands) == -1) {
-        // I think we use execvp so a path doesn't need to be specified
-        // also because our arguments are in an array
-        const char *err = FORMAT_MSG("shell", EXEC_ERROR_MSG);
+  } else {
+    int wstatus = 0;
+    if (!is_background) {
+      if (waitpid(pid, &wstatus, 0) == -1) {
+        // char *err = "shell: unable to wait for child\n";
+        const char *err = FORMAT_MSG("shell", WAIT_ERROR_MSG);
         write(STDERR_FILENO, err, strlen(err));
       }
-    } else {
-      int wstatus = 0;
-      if (!is_background) {
-        if (waitpid(pid, &wstatus, 0) == -1) {
-          // char *err = "shell: unable to wait for child\n";
-          const char *err = FORMAT_MSG("shell", WAIT_ERROR_MSG);
-          write(STDERR_FILENO, err, strlen(err));
-        }
-      }
+      kill_zombies();
     }
   }
 }
