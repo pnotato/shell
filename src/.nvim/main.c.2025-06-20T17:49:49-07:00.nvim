@@ -16,6 +16,7 @@ void kill_zombies();
 
 void shell() {
   char current_line[MAX_COMMAND_SIZE];
+  ssize_t command_size;
 
   // Variables for cwd
   char cwd_buf[PATH_MAX];
@@ -29,12 +30,11 @@ void shell() {
       write(STDERR_FILENO, err, strlen(err));
       cwd_ptr = "";
     }
-    const char *shell_sign = "$ ";
+
     write(STDOUT_FILENO, cwd_ptr,
-          strlen(
-              cwd_ptr)); // For reference, this is the shell path that's printed
-    write(STDOUT_FILENO, shell_sign, strlen(shell_sign));
-    ssize_t command_size = read(STDIN_FILENO, current_line, MAX_COMMAND_SIZE);
+          sizeof(
+              &cwd_ptr)); // For reference, this is the shell path that's printed
+    command_size = read(STDIN_FILENO, current_line, MAX_COMMAND_SIZE);
     if (command_size == 0) {
       const char *file_err = FORMAT_MSG("shell", GETCWD_ERROR_MSG);
       write(STDERR_FILENO, file_err, strlen(file_err));

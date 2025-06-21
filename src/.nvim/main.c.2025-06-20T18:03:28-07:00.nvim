@@ -29,7 +29,7 @@ void shell() {
       write(STDERR_FILENO, err, strlen(err));
       cwd_ptr = "";
     }
-    const char *shell_sign = "$ ";
+    const char* shell_sign = "$ ";
     write(STDOUT_FILENO, cwd_ptr,
           strlen(
               cwd_ptr)); // For reference, this is the shell path that's printed

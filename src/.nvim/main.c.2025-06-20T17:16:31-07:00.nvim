@@ -9,38 +9,30 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#define MAX_COMMAND_SIZE 4096
-
 void run_line(char *line);
 void kill_zombies();
 
 void shell() {
-  char current_line[MAX_COMMAND_SIZE];
+  char *current_line = NULL;
+  size_t len = 0;
+  ssize_t nread;
 
   // Variables for cwd
   char cwd_buf[PATH_MAX];
 
   while (true) {
+
     // Current Working Directory and shell stuff
     char *cwd_ptr = getcwd(cwd_buf, sizeof(cwd_buf));
 
     if (cwd_ptr == NULL) {
-      const char *err = FORMAT_MSG("shell", GETCWD_ERROR_MSG);
-      write(STDERR_FILENO, err, strlen(err));
+      const char* err = FORMAT_MSG("shell", GETCWD_ERROR_MSG);
+      write(STDERR_FILENO, err, strlen(err)); 
       cwd_ptr = "";
     }
-    const char *shell_sign = "$ ";
-    write(STDOUT_FILENO, cwd_ptr,
-          strlen(
-              cwd_ptr)); // For reference, this is the shell path that's printed
-    write(STDOUT_FILENO, shell_sign, strlen(shell_sign));
-    ssize_t command_size = read(STDIN_FILENO, current_line, MAX_COMMAND_SIZE);
-    if (command_size == 0) {
-      const char *file_err = FORMAT_MSG("shell", GETCWD_ERROR_MSG);
-      write(STDERR_FILENO, file_err, strlen(file_err));
-      continue;
-    }
-    current_line[command_size] = '\0';
+    printf("%s$ ", cwd_ptr); // For reference, this is the shell path that's printed
+    nread = getline(&current_line, &len, stdin);
+    // printf("%s\n", current_line);
 
     run_line(current_line);
     // NEED A FREE FOR THE LINE THATS PASSED TO RUN_LINE
@@ -74,14 +66,14 @@ void run_line(char *line) {
   pid_t pid = fork();
 
   if (pid == -1) {
-    const char *err = FORMAT_MSG("shell", FORK_ERROR_MSG);
+    const char* err = FORMAT_MSG("shell", FORK_ERROR_MSG);
     write(STDERR_FILENO, err, strlen(err)); // MAYBE CHANGE TO OUT?
   } else if (pid == 0 && commands[0] != NULL) {
 
     if (execvp(commands[0], commands) == -1) {
       // I think we use execvp so a path doesn't need to be specified
       // also because our arguments are in an array
-      const char *err = FORMAT_MSG("shell", EXEC_ERROR_MSG);
+      const char* err = FORMAT_MSG("shell", FORK_ERROR_MSG);
       write(STDERR_FILENO, err, strlen(err));
     }
 
@@ -110,7 +102,6 @@ void kill_zombies() {
 // Background Execution
 
 int main() {
-  printf("TEST");
   shell();
   return 0;
 }
