@@ -111,7 +111,7 @@ void run_line(char *line, char *cwd, char *cwd_prev_ptr) {
       exit(EXIT_SUCCESS);
     } else {
       const char *exit_cmd_err = FORMAT_MSG("exit", TMA_MSG);
-      write(STDERR_FILENO, exit_cmd_err, strlen(exit_cmd_err));
+      write(STDOUT_FILENO, exit_cmd_err, strlen(exit_cmd_err));
       return;
     }
   } else if (strcmp(commands[0], "pwd") == 0) {
