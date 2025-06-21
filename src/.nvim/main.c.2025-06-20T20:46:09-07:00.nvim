@@ -2,13 +2,13 @@
 #include "../include/msgs.h"
 #include <errno.h>
 #include <limits.h>
-#include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <signal.h>
 
 #define MAX_COMMAND_SIZE 4096
 
@@ -28,7 +28,6 @@ void shell() {
   handler.sa_handler = handle_sigint;
   sigemptyset(&handler.sa_mask);
   handler.sa_flags = 0;
-  sigaction(SIGINT, &handler, NULL);
 
   while (true) {
     // Current Working Directory and shell stuff
@@ -45,12 +44,7 @@ void shell() {
               cwd_ptr)); // For reference, this is the shell path that's printed
     write(STDOUT_FILENO, shell_sign, strlen(shell_sign));
     ssize_t command_size = read(STDIN_FILENO, current_line, MAX_COMMAND_SIZE);
-    if (command_size == -1) {
-      if (errno == EINTR) {
-        continue;
-      }
-
-    } else if (command_size == 0) {
+    if (command_size == 0) {
       const char *file_err = FORMAT_MSG("shell", GETCWD_ERROR_MSG);
       write(STDERR_FILENO, file_err, strlen(file_err));
       continue;
@@ -64,16 +58,14 @@ void shell() {
 
 // Handle Siging
 void handle_sigint() {
-  const char *help_space = "\n";
   const char *help_msg0 = FORMAT_MSG("cd", CD_HELP_MSG);
   const char *help_msg1 = FORMAT_MSG("pwd", PWD_HELP_MSG);
-  const char *help_msg2 = FORMAT_MSG("exit", EXIT_HELP_MSG);
-  const char *help_msg3 = FORMAT_MSG("help", HELP_HELP_MSG);
-  write(STDOUT_FILENO, help_space, strlen(help_space));
-  write(STDOUT_FILENO, help_msg3, strlen(help_msg3));
-  write(STDOUT_FILENO, help_msg1, strlen(help_msg1));
-  write(STDOUT_FILENO, help_msg2, strlen(help_msg2));
-  write(STDOUT_FILENO, help_msg0, strlen(help_msg0));
+      const char *help_msg2 = FORMAT_MSG("exit", EXIT_HELP_MSG);
+      const char *help_msg3 = FORMAT_MSG("help", HELP_HELP_MSG);
+      write(STDOUT_FILENO, help_msg3, strlen(help_msg3));
+      write(STDOUT_FILENO, help_msg1, strlen(help_msg1));
+      write(STDOUT_FILENO, help_msg2, strlen(help_msg2));
+      write(STDOUT_FILENO, help_msg0, strlen(help_msg0));
   return;
 }
 
