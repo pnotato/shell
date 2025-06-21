@@ -14,8 +14,6 @@
 void run_line(char *line);
 void kill_zombies();
 
-void debug(char *line) { write(STDERR_FILENO, line, strlen(line)); }
-
 void shell() {
   char current_line[MAX_COMMAND_SIZE];
 
@@ -62,7 +60,7 @@ void run_line(char *line) {
     token = strtok_r(NULL, " \n", &saveptr);
   }
   if (i > 0 && strcmp(commands[i - 1], "&") == 0) {
-    debug("DEBUG: BACKGROUND MODE ON");
+    printf("DEBUG: BACKGROUND MODE ON");
     is_background = true;
     commands[i - 1] = NULL;
   } else {
@@ -72,32 +70,30 @@ void run_line(char *line) {
   // Checks if the array is empty. if it is, immediately return
   if (commands[0] == NULL) {
     return;
+  } 
+
+  // Check if an internal command is run. 
+  if (strcmp(commands[0], 'exit') == 0) {
+    printf("AOFSHJ");
+
   }
 
-  // Check if an internal command is run.
-  if (strcmp(commands[0], "exit") == 0) {
-    if (commands[1] == NULL) {
-      exit(0);
-    } else {
-      const char *err = FORMAT_MSG("exit", TMA_MSG);
-      write(STDOUT_FILENO, err, strlen(err));
-      return;
-    }
-  }
 
-  // If no internal command is run, continue with fork.
+  // If no internal command is run, continue with fork. 
   pid_t pid = fork();
   if (pid == -1) {
     const char *err = FORMAT_MSG("shell", FORK_ERROR_MSG);
     write(STDERR_FILENO, err, strlen(err)); // MAYBE CHANGE TO OUT?
-  } else if (pid == 0 && commands[0] != NULL) {
+  } 
+  else if (pid == 0 && commands[0] != NULL) {
     if (execvp(commands[0], commands) == -1) {
       // I think we use execvp so a path doesn't need to be specified
       // also because our arguments are in an array
       const char *err = FORMAT_MSG("shell", EXEC_ERROR_MSG);
       write(STDERR_FILENO, err, strlen(err));
     }
-  } else {
+  } 
+  else {
     int wstatus = 0;
     if (!is_background) {
       if (waitpid(pid, &wstatus, 0) == -1) {
@@ -122,6 +118,7 @@ void kill_zombies() {
 // Background Execution
 
 int main() {
+  printf("TEST");
   shell();
   return 0;
 }
