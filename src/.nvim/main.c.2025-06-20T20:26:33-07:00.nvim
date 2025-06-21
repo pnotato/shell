@@ -173,11 +173,8 @@ void run_line(char *line, char *cwd, char *cwd_prev_ptr) {
       write(STDOUT_FILENO, help_help_msg, strlen(help_help_msg));
       return;
     } else {
-      // debug("break1");
-      // FORMAT MSG DOES NOT WORK HERE.
-      char help_extern_msg[PATH_MAX];
-      snprintf(help_extern_msg, PATH_MAX, "%s:%s\n", commands[1],
-               EXTERN_HELP_MSG);
+      debug("break1");
+      const char *help_extern_msg = FORMAT_MSG(commands[1];, EXTERN_HELP_MSG);
       write(STDOUT_FILENO, help_extern_msg, strlen(help_extern_msg));
       return;
     }
