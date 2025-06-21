@@ -177,11 +177,7 @@ void run_line(char *line, char *cwd, char *cwd_prev_ptr, int history_count,
       return;
     }
   } else if (commands[0][0] == '!') {
-
-    if (strcmp(commands[0], "!!") == 0) {
-      char *command = get_nth_history();
-    }
-
+    debug("YES");
     return;
     // pid_t pid = fork();
     // if (pid == -1) {

@@ -176,35 +176,35 @@ void run_line(char *line, char *cwd, char *cwd_prev_ptr, int history_count,
       write(STDERR_FILENO, exit_cmd_err, strlen(exit_cmd_err));
       return;
     }
-  } else if (commands[0][0] == '!') {
-
-    if (strcmp(commands[0], "!!") == 0) {
-      char *command = get_nth_history();
-    }
-
+  } 
+  else if (commands[0][0] == '!') {
+    debug("YES");
     return;
-    // pid_t pid = fork();
-    // if (pid == -1) {
-    //   const char *err = FORMAT_MSG("shell", FORK_ERROR_MSG);
-    //   write(STDERR_FILENO, err, strlen(err)); // MAYBE CHANGE TO OUT?
-    // } else if (pid == 0 && commands[0] != NULL) {
-    //   if (execvp(commands[0], commands) == -1) {
-    //     // I think we use execvp so a path doesn't need to be specified
-    //     // also because our arguments are in an array
-    //     const char *err = FORMAT_MSG("shell", EXEC_ERROR_MSG);
-    //     write(STDERR_FILENO, err, strlen(err));
-    //   }
-    // } else {
-    //   int wstatus = 0;
-    //   if (!is_background) {
-    //     if (waitpid(pid, &wstatus, 0) == -1) {
-    //       // char *err = "shell: unable to wait for child\n";
-    //       const char *err = FORMAT_MSG("shell", WAIT_ERROR_MSG);
-    //       write(STDERR_FILENO, err, strlen(err));
-    //     }
-    //   }
-    // }
+//pid_t pid = fork();
+//if (pid == -1) {
+//  const char *err = FORMAT_MSG("shell", FORK_ERROR_MSG);
+//  write(STDERR_FILENO, err, strlen(err)); // MAYBE CHANGE TO OUT?
+//} else if (pid == 0 && commands[0] != NULL) {
+//  if (execvp(commands[0], commands) == -1) {
+//    // I think we use execvp so a path doesn't need to be specified
+//    // also because our arguments are in an array
+//    const char *err = FORMAT_MSG("shell", EXEC_ERROR_MSG);
+//    write(STDERR_FILENO, err, strlen(err));
+//  }
+//} else {
+//  int wstatus = 0;
+//  if (!is_background) {
+//    if (waitpid(pid, &wstatus, 0) == -1) {
+//      // char *err = "shell: unable to wait for child\n";
+//      const char *err = FORMAT_MSG("shell", WAIT_ERROR_MSG);
+//      write(STDERR_FILENO, err, strlen(err));
+//    }
+//  }
+//}
   }
+
+
+
 
   else if (strcmp(commands[0], "history") == 0) {
     print_history(history_count, history_numbers, input_history);

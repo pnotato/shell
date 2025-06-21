@@ -178,9 +178,12 @@ void run_line(char *line, char *cwd, char *cwd_prev_ptr, int history_count,
     }
   } else if (commands[0][0] == '!') {
 
+
     if (strcmp(commands[0], "!!") == 0) {
-      char *command = get_nth_history();
+      char* command = get_nth_history(); 
+
     }
+
 
     return;
     // pid_t pid = fork();
