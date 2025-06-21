@@ -82,7 +82,7 @@ void add_to_history(char *input, int *history_count, int *history_numbers,
   if (*history_count >= MAX_HISTORY_LEN) {
     remove_oldest_record(history_count, input_history);
   }
-  input_history[*history_count] = strdup(input);
+  input_history[*history_count] = input;
   (*history_count)++;
   (*history_numbers)++;
 }
@@ -102,10 +102,9 @@ void print_history(int history_count, int history_numbers,
   int index = history_numbers - 1;
   for (int i = 0; i < history_count; i++) {
     char history_buf[MAX_COMMAND_SIZE];
-    snprintf(history_buf, MAX_COMMAND_SIZE, "%d \t %s", index,
+    snprintf(history_buf, MAX_COMMAND_SIZE, "%d \t %s \n", index,
              input_history[i]);
-    write(STDOUT_FILENO, history_buf, strlen(history_buf));
-    index--;
+    write(STDOUT_FILENO, history_buf, MAX_COMMAND_SIZE);
   }
 }
 

@@ -1,5 +1,6 @@
 #define _GNU_SOURCE
 #include "../include/msgs.h"
+#include "../include/history.h"
 #include <errno.h>
 #include <limits.h>
 #include <signal.h>
@@ -11,30 +12,18 @@
 #include <unistd.h>
 
 #define MAX_COMMAND_SIZE 4096
-#define MAX_HISTORY_LEN 10
 
-void run_line(char *line, char *cwd, char *cwd_prev, int history_count,
-              int history_numbers, char **input_history);
+void run_line(char *line, char *cwd, char *cwd_prev);
 void kill_zombies();
 void handle_sigint();
-void add_to_history(char *input, int *history_count, int *history_numbers,
-                    char **input_history);
-void remove_oldest_record(int *history_count, char **input_history);
 void debug(char *line) { write(STDERR_FILENO, line, strlen(line)); }
 
 void shell() {
   // Variables for cwd
   char current_line[MAX_COMMAND_SIZE];
   char cwd_buf[PATH_MAX];
-
-  // Previous for cd -
   char cwd_prev[PATH_MAX];
   char *cwd_prev_ptr = cwd_prev;
-
-  // History
-  char *input_history[MAX_HISTORY_LEN];
-  int history_count = 0;
-  int history_numbers = 0;
 
   struct sigaction handler;
   handler.sa_handler = handle_sigint;
@@ -68,44 +57,9 @@ void shell() {
       continue;
     }
     current_line[command_size] = '\0';
-    add_to_history(current_line, &history_count, &history_numbers,
-                   input_history);
-    run_line(current_line, cwd_ptr, cwd_prev_ptr, history_count,
-             history_numbers, input_history);
+
+    run_line(current_line, cwd_ptr, cwd_prev_ptr);
     // NEED A FREE FOR THE LINE THATS PASSED TO RUN_LINE
-  }
-}
-
-// History
-void add_to_history(char *input, int *history_count, int *history_numbers,
-                    char **input_history) {
-  if (*history_count >= MAX_HISTORY_LEN) {
-    remove_oldest_record(history_count, input_history);
-  }
-  input_history[*history_count] = strdup(input);
-  (*history_count)++;
-  (*history_numbers)++;
-}
-
-void remove_oldest_record(int *history_count, char **input_history) {
-  if (history_count > 0) {
-    free(input_history[0]);
-    for (int i = 1; i < *history_count; i++) {
-      input_history[i - 1] = input_history[i];
-    }
-    (*history_count)--;
-  }
-}
-
-void print_history(int history_count, int history_numbers,
-                   char **input_history) {
-  int index = history_numbers - 1;
-  for (int i = 0; i < history_count; i++) {
-    char history_buf[MAX_COMMAND_SIZE];
-    snprintf(history_buf, MAX_COMMAND_SIZE, "%d \t %s", index,
-             input_history[i]);
-    write(STDOUT_FILENO, history_buf, strlen(history_buf));
-    index--;
   }
 }
 
@@ -125,8 +79,7 @@ void handle_sigint() {
 }
 
 // Foreground Execution
-void run_line(char *line, char *cwd, char *cwd_prev_ptr, int history_count,
-              int history_numbers, char **input_history) {
+void run_line(char *line, char *cwd, char *cwd_prev_ptr) {
   char *commands[4096]; // CHANGE THIS LATER ON
   memset(commands, 0, sizeof(commands));
   char *saveptr;
@@ -162,9 +115,6 @@ void run_line(char *line, char *cwd, char *cwd_prev_ptr, int history_count,
       write(STDERR_FILENO, exit_cmd_err, strlen(exit_cmd_err));
       return;
     }
-  } else if (strcmp(commands[0], "history") == 0) {
-    print_history(history_count, history_numbers, input_history);
-    return;
   } else if (strcmp(commands[0], "pwd") == 0) {
     char cwd_buf[PATH_MAX];
     char *cwd_ptr = getcwd(cwd_buf, sizeof(cwd_buf));
