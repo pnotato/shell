@@ -1,4 +1,3 @@
-
 #define _GNU_SOURCE
 #include "../include/msgs.h"
 #include <errno.h>
@@ -192,21 +191,9 @@ void run_line(char *line, char *cwd, char *cwd_prev_ptr, int history_count,
         // valid
         char *history_no_last = FORMAT_MSG("history", HISTORY_NO_LAST_MSG);
         write(STDERR_FILENO, history_no_last, strlen(history_no_last));
-        return;
       } else {
-        char *last_line = input_history[history_count - 1];
-
-        for (int i = 0; i < MAX_COMMAND_SIZE; i++) {
-          commands[i] = NULL;
-        }
-
-        write(STDOUT_FILENO, last_line, strlen(last_line));
-
-        tokenize_input(last_line, commands, &is_background);
-        create_child_process(is_background, commands);
-        input_history[history_count] = strdup(last_line);
-        history_count++;
-        return;
+        char *line = input_history[history_count - 1];
+        create_child_process(is_background, &commands);
       }
     } else {
       char *end;
@@ -219,28 +206,28 @@ void run_line(char *line, char *cwd, char *cwd_prev_ptr, int history_count,
         return;
       }
     }
-    // pid_t pid = fork();
-    // if (pid == -1) {
-    //   const char *history_shell_err = FORMAT_MSG("shell", FORK_ERROR_MSG);
-    //   write(STDERR_FILENO, history_shell_err,
-    //         strlen(history_shell_err)); // MAYBE CHANGE TO OUT?
-    // } else if (pid == 0 && commands[0] != NULL) {
-    //   if (execvp(commands[0], commands) == -1) {
-    //     // I think we use execvp so a path doesn't need to be specified
-    //     // also because our arguments are in an array
-    //     const char *err = FORMAT_MSG("shell", EXEC_ERROR_MSG);
-    //     write(STDERR_FILENO, err, strlen(err));
-    //   }
-    // } else {
-    //   int wstatus = 0;
-    //   if (!is_background) {
-    //     if (waitpid(pid, &wstatus, 0) == -1) {
-    //       // char *err = "shell: unable to wait for child\n";
-    //       const char *err = FORMAT_MSG("shell", WAIT_ERROR_MSG);
-    //       write(STDERR_FILENO, err, strlen(err));
-    //     }
-    //   }
-    // }
+    pid_t pid = fork();
+    if (pid == -1) {
+      const char *history_shell_err = FORMAT_MSG("shell", FORK_ERROR_MSG);
+      write(STDERR_FILENO, history_shell_err,
+            strlen(history_shell_err)); // MAYBE CHANGE TO OUT?
+    } else if (pid == 0 && commands[0] != NULL) {
+      if (execvp(commands[0], commands) == -1) {
+        // I think we use execvp so a path doesn't need to be specified
+        // also because our arguments are in an array
+        const char *err = FORMAT_MSG("shell", EXEC_ERROR_MSG);
+        write(STDERR_FILENO, err, strlen(err));
+      }
+    } else {
+      int wstatus = 0;
+      if (!is_background) {
+        if (waitpid(pid, &wstatus, 0) == -1) {
+          // char *err = "shell: unable to wait for child\n";
+          const char *err = FORMAT_MSG("shell", WAIT_ERROR_MSG);
+          write(STDERR_FILENO, err, strlen(err));
+        }
+      }
+    }
   }
 
   else if (strcmp(commands[0], "history") == 0) {

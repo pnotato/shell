@@ -1,0 +1,12 @@
+{"version": 2, "width": 122, "height": 46, "timestamp": 1750711729, "idle_time_limit": 5.0, "env": {"SHELL": "/usr/bin/zsh", "TERM": "xterm-256color"}}
+[0.066696, "o", "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                         \r \r"]
+[0.067401, "o", "\u001b]2;cmpt201@10360e5d85f7:~/units/04-long-assignments/a8-pnotato/src\u0007\u001b]1;..8-pnotato/src\u0007"]
+[0.068007, "o", "\u001b]7;file://10360e5d85f7/home/cmpt201/units/04-long-assignments/a8-pnotato/src\u001b\\"]
+[0.078345, "o", "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[recording] \u001b[34m~/units/04-long-assignments/a8-pnotato/src\u001b[32m❯\u001b[39m \u001b[K"]
+[0.078597, "o", "\u001b[?1h\u001b=\u001b[?2004h"]
+[0.452719, "i", "n"]
+[0.455756, "o", "n"]
+[0.458076, "o", "\b\u001b[1m\u001b[31mn\u001b[0m\u001b[39m"]
+[0.458125, "o", "\b\u001b[1m\u001b[31mn\u001b[0m\u001b[39m\u001b[92mvim main.c\u001b[39m\u001b[10D"]
+[0.53654, "i", "v"]
+[0.537002, "o", "\b\u001b[1m\u001b[31mn\u001b[1m\u001b[31mv\u001b[0m\u001b[39m"]
