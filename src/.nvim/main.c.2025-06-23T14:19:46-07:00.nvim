@@ -3,13 +3,11 @@
 #include "../include/msgs.h"
 #include <errno.h>
 #include <limits.h>
-#include <pwd.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -25,15 +23,9 @@ void add_to_history(char *input, int *history_count, int *history_numbers,
 void remove_oldest_record(int *history_count, char **input_history);
 char *get_nth_history(int index, int history_count, int history_numbers,
                       char **input_history);
-void create_child_process(bool is_background, char **commands, char *cwd,
-                          char *cwd_prev_ptr, int history_count,
-                          int history_numbers, char **input_history);
+void create_child_process(bool is_background, char **commands, char *cwd, char *cwd_prev_ptr, int history_count, int history_numbers, char **input_history);
 void tokenize_input(char *line, char **commands, bool *is_background);
 void debug(char *line) { write(STDERR_FILENO, line, strlen(line)); }
-
-char *input_history[MAX_HISTORY_LEN];
-int history_count = 0;
-int history_numbers = 0;
 
 void shell() {
   // Variables for cwd
@@ -45,6 +37,9 @@ void shell() {
   char *cwd_prev_ptr = cwd_prev;
 
   // History
+  char *input_history[MAX_HISTORY_LEN];
+  int history_count = 0;
+  int history_numbers = 0;
 
   struct sigaction handler;
   handler.sa_handler = handle_sigint;
@@ -112,17 +107,12 @@ void remove_oldest_record(int *history_count, char **input_history) {
 void print_history(int history_count, int history_numbers,
                    char **input_history) {
   int index = history_numbers - 1;
-  int print_nums = history_count < 10 ? history_count : 10;
-  for (int i = 0; i < print_nums; i++) {
-    int hist_index = history_count - 1 - i;
-    char *cmd = input_history[hist_index];
-    size_t len = strlen(cmd);
-    if (len > 0 && cmd[len - 1] == '\n') {
-      cmd[len - 1] = '\0';
-    }
-    char history_buf[MAX_COMMAND_SIZE + 32];
-    snprintf(history_buf, sizeof(history_buf), "%d\t%s\n", index - i, cmd);
+  for (int i = 0; i < history_count; i++) {
+    char history_buf[MAX_COMMAND_SIZE];
+    snprintf(history_buf, MAX_COMMAND_SIZE, "%d \t %s", index,
+             input_history[i]);
     write(STDOUT_FILENO, history_buf, strlen(history_buf));
+    index--;
   }
 }
 
@@ -144,24 +134,22 @@ void handle_sigint() {
   const char *help_msg1 = FORMAT_MSG("pwd", PWD_HELP_MSG);
   const char *help_msg2 = FORMAT_MSG("exit", EXIT_HELP_MSG);
   const char *help_msg3 = FORMAT_MSG("help", HELP_HELP_MSG);
-  const char *help_msg4 = FORMAT_MSG("history", HISTORY_HELP_MSG);
   write(STDOUT_FILENO, help_space, strlen(help_space));
   write(STDOUT_FILENO, help_msg3, strlen(help_msg3));
   write(STDOUT_FILENO, help_msg1, strlen(help_msg1));
   write(STDOUT_FILENO, help_msg2, strlen(help_msg2));
   write(STDOUT_FILENO, help_msg0, strlen(help_msg0));
-  write(STDOUT_FILENO, help_msg4, strlen(help_msg4));
   return;
 }
 
 void tokenize_input(char *line, char **commands, bool *is_background) {
   char *saveptr;
-  char *token = strtok_r(line, " \n\t", &saveptr);
+  char *token = strtok_r(line, " \n", &saveptr);
   int i = 0;
 
   while (token != NULL) {
     commands[i++] = token;
-    token = strtok_r(NULL, " \n\t", &saveptr);
+    token = strtok_r(NULL, " \n", &saveptr);
   }
   if (i > 0 && strcmp(commands[i - 1], "&") == 0) {
     // debug("DEBUG: BACKGROUND MODE ON");
@@ -186,18 +174,14 @@ void run_line(char *line, char *cwd, char *cwd_prev_ptr, int history_count,
   if (commands[0] == NULL) {
     return;
   }
-  create_child_process(is_background, commands, cwd, cwd_prev_ptr,
-                       history_count, history_numbers, input_history);
+    create_child_process(is_background, commands, cwd, cwd_prev_ptr, history_count, history_numbers, input_history);
 }
 
-void create_child_process(bool is_background, char **commands, char *cwd,
-                          char *cwd_prev_ptr, int history_count,
-                          int history_numbers, char **input_history) {
+void create_child_process(bool is_background, char **commands, char *cwd, char *cwd_prev_ptr, int history_count, int history_numbers, char **input_history) {
   // If no internal command is run, continue with fork.
-  // Check if an internal command is run.
+// Check if an internal command is run.
   if (strcmp(commands[0], "exit") == 0) {
     if (commands[1] == NULL) {
-      kill_zombies();
       exit(EXIT_SUCCESS);
     } else {
       const char *exit_cmd_err = FORMAT_MSG("exit", TMA_MSG);
@@ -215,24 +199,17 @@ void create_child_process(bool is_background, char **commands, char *cwd,
         return;
       } else {
         char *last_line = input_history[history_count - 1];
-        char *last_line_copy = strdup(last_line);
-        if (!last_line_copy)
-          return;
 
         for (int i = 0; i < MAX_COMMAND_SIZE; i++) {
           commands[i] = NULL;
         }
 
-        write(STDOUT_FILENO, last_line_copy, strlen(last_line_copy));
-        // write(STDOUT_FILENO, "\n", 1);
+        write(STDOUT_FILENO, last_line, strlen(last_line));
 
-        add_to_history(last_line_copy, &history_count, &history_numbers,
+        tokenize_input(last_line, commands, &is_background);
+    create_child_process(is_background, commands, cwd, cwd_prev_ptr, history_count, history_numbers, input_history);
+        add_to_history(last_line, &history_count, &history_numbers,
                        input_history);
-
-        tokenize_input(last_line_copy, commands, &is_background);
-        create_child_process(is_background, commands, cwd, cwd_prev_ptr,
-                             history_count, history_numbers, input_history);
-        free(last_line_copy);
         return;
       }
     } else {
@@ -240,45 +217,25 @@ void create_child_process(bool is_background, char **commands, char *cwd,
       char *n_val = commands[0] + 1;
       long index = strtol(n_val, &end, 10);
 
-      if (*end != '\0' || index < 0 || index >= history_numbers) {
-        char *history_invalid = FORMAT_MSG("history", HISTORY_INVALID_MSG);
-        write(STDERR_FILENO, history_invalid, strlen(history_invalid));
+      if (*end != '\0' || index < 0 || index >= history_count) {
+        char *history_no_last = FORMAT_MSG("history", HISTORY_INVALID_MSG);
+        write(STDERR_FILENO, history_no_last, strlen(history_no_last));
         return;
       }
 
-      char *resolved_line =
-          get_nth_history(index, history_count, history_numbers, input_history);
-
-      if (!resolved_line) {
-        char *invalid_err_msg = FORMAT_MSG("history", HISTORY_INVALID_MSG);
-        write(STDERR_FILENO, invalid_err_msg, strlen(invalid_err_msg));
-        return;
-      }
-
-      // char full_line[PATH_MAX + MAX_COMMAND_SIZE];
-      // snprintf(full_line, sizeof(full_line), "%s$ %s\n", cwd, resolved_line);
-
-      write(STDOUT_FILENO, resolved_line, strlen(resolved_line));
-      // write(STDOUT_FILENO, "\n", 1);
+      char *target_line = input_history[index];
 
       for (int i = 0; i < MAX_COMMAND_SIZE; i++) {
         commands[i] = NULL;
       }
 
-      char *temp_line = strdup(resolved_line);
-      if (!temp_line)
-        return;
-      size_t len = strlen(temp_line);
-      if (len > 0 && temp_line[len - 1] == '\n') {
-        temp_line[len - 1] = '\0';
-      }
-      tokenize_input(temp_line, commands, &is_background);
-      create_child_process(is_background, commands, cwd, cwd_prev_ptr,
-                           history_count, history_numbers, input_history);
+      write(STDOUT_FILENO, target_line, strlen(target_line));
 
-      add_to_history(temp_line, &history_count, &history_numbers,
+      tokenize_input(target_line, commands, &is_background);
+      create_child_process(is_background, commands, cwd, cwd_prev_ptr, history_count, history_numbers, input_history);
+
+      add_to_history(target_line, &history_count, &history_numbers,
                      input_history);
-      free(temp_line);
       return;
     }
     // pid_t pid = fork();
@@ -331,32 +288,19 @@ void create_child_process(bool is_background, char **commands, char *cwd,
     // char cwd_buf[PATH_MAX];
     // char *cwd_ptr = getcwd(cwd_buf, sizeof(cwd_buf));
     char *new_path;
+    char new_path_buf[PATH_MAX];
     if (commands[2] != NULL) {
       const char *err = FORMAT_MSG("cd", TMA_MSG);
       write(STDERR_FILENO, err, strlen(err));
       return;
     }
     if (commands[1] == NULL || strcmp(commands[1], "~") == 0) {
-      struct passwd *pw = getpwuid(getuid());
-      if (pw == NULL) {
-        const char *cd_err = FORMAT_MSG("cd", GETCWD_ERROR_MSG);
-        write(STDERR_FILENO, cd_err, strlen(cd_err));
-        return;
-      }
-      new_path = pw->pw_dir;
+      new_path = "/home";
     } else if (commands[1][0] == '~') {
-      // struct passwd *pw_user = getpwnam(commands[1] + 1);
-      struct passwd *pw_user = getpwuid(getuid());
-      if (pw_user == NULL) {
-        const char *cd_err2 = FORMAT_MSG("cd", GETCWD_ERROR_MSG);
-        write(STDERR_FILENO, cd_err2, strlen(cd_err2));
-        return;
-      }
-
-      char expanded[PATH_MAX];
-      snprintf(expanded, sizeof(expanded), "%s%s", pw_user->pw_dir,
-               commands[1] + 1);
-      new_path = expanded;
+      // DEBUG: This still causes a warning, but should be safe.
+      // Check later in case of memory leak.
+      snprintf(new_path_buf, sizeof(new_path_buf), "/home%s", commands[1] + 1);
+      new_path = new_path_buf;
     } else if (strcmp(commands[1], "-") == 0) {
       new_path = cwd_prev_ptr;
     } else {
@@ -364,17 +308,12 @@ void create_child_process(bool is_background, char **commands, char *cwd,
     }
 
     // Actual running of path
-    if (chdir(new_path) != 0) {
-      const char *err = FORMAT_MSG("cd", CHDIR_ERROR_MSG);
-      write(STDERR_FILENO, err, strlen(err));
-
+    if (chdir(new_path) == 0) {
       snprintf(cwd_prev_ptr, PATH_MAX, "%s", cwd);
       return;
     } else {
-
-      snprintf(cwd_prev_ptr, PATH_MAX, "%s", cwd);
-      // const char *err = FORMAT_MSG("cd", CHDIR_ERROR_MSG);
-      // write(STDERR_FILENO, err, strlen(err));
+      const char *err = FORMAT_MSG("cd", CHDIR_ERROR_MSG);
+      write(STDERR_FILENO, err, strlen(err));
     }
   } else if (strcmp(commands[0], "help") == 0) {
     if (commands[2] != NULL) {
@@ -383,8 +322,6 @@ void create_child_process(bool is_background, char **commands, char *cwd,
       return;
     }
     if (commands[1] == NULL) {
-
-      const char *help_msg4 = FORMAT_MSG("history", HISTORY_HELP_MSG);
       const char *help_msg0 = FORMAT_MSG("cd", CD_HELP_MSG);
       const char *help_msg1 = FORMAT_MSG("pwd", PWD_HELP_MSG);
       const char *help_msg2 = FORMAT_MSG("exit", EXIT_HELP_MSG);
@@ -393,9 +330,9 @@ void create_child_process(bool is_background, char **commands, char *cwd,
       write(STDOUT_FILENO, help_msg1, strlen(help_msg1));
       write(STDOUT_FILENO, help_msg2, strlen(help_msg2));
       write(STDOUT_FILENO, help_msg0, strlen(help_msg0));
-      write(STDOUT_FILENO, help_msg4, strlen(help_msg4));
       return;
     } else if (strcmp(commands[1], "cd") == 0) {
+      debug("HELP CD\n");
       const char *help_cd_msg = FORMAT_MSG("cd", CD_HELP_MSG);
       write(STDOUT_FILENO, help_cd_msg, strlen(help_cd_msg));
       return;
@@ -422,28 +359,28 @@ void create_child_process(bool is_background, char **commands, char *cwd,
     }
 
   } else {
-    pid_t pid = fork();
-    if (pid == -1) {
-      const char *err = FORMAT_MSG("shell", FORK_ERROR_MSG);
-      write(STDERR_FILENO, err, strlen(err)); // MAYBE CHANGE TO OUT?
-    } else if (pid == 0 && commands[0] != NULL) {
-      if (execvp(commands[0], commands) == -1) {
-        // I think we use execvp so a path doesn't need to be specified
-        // also because our arguments are in an array
-        const char *err = FORMAT_MSG("shell", EXEC_ERROR_MSG);
+  pid_t pid = fork();
+  if (pid == -1) {
+    const char *err = FORMAT_MSG("shell", FORK_ERROR_MSG);
+    write(STDERR_FILENO, err, strlen(err)); // MAYBE CHANGE TO OUT?
+  } else if (pid == 0 && commands[0] != NULL) {
+    if (execvp(commands[0], commands) == -1) {
+      // I think we use execvp so a path doesn't need to be specified
+      // also because our arguments are in an array
+      const char *err = FORMAT_MSG("shell", EXEC_ERROR_MSG);
+      write(STDERR_FILENO, err, strlen(err));
+    }
+  } else {
+    int wstatus = 0;
+    if (!is_background) {
+      if (waitpid(pid, &wstatus, 0) == -1) {
+        // char *err = "shell: unable to wait for child\n";
+        const char *err = FORMAT_MSG("shell", WAIT_ERROR_MSG);
         write(STDERR_FILENO, err, strlen(err));
-      }
-    } else {
-      int wstatus = 0;
-      if (!is_background) {
-        if (waitpid(pid, &wstatus, 0) == -1) {
-          // char *err = "shell: unable to wait for child\n";
-          const char *err = FORMAT_MSG("shell", WAIT_ERROR_MSG);
-          write(STDERR_FILENO, err, strlen(err));
-        }
       }
     }
   }
+}
 }
 
 // kills all currently running child processes.
