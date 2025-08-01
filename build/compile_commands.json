@@ -1,0 +1,14 @@
+[
+{
+  "directory": "/Users/nicholaschan/Documents/Projects/Shell/build",
+  "command": "/usr/bin/clang -I/Users/nicholaschan/Documents/Projects/Shell/include -g -std=gnu11 -arch arm64 -o CMakeFiles/shell.dir/src/main.c.o -c /Users/nicholaschan/Documents/Projects/Shell/src/main.c",
+  "file": "/Users/nicholaschan/Documents/Projects/Shell/src/main.c",
+  "output": "CMakeFiles/shell.dir/src/main.c.o"
+},
+{
+  "directory": "/Users/nicholaschan/Documents/Projects/Shell/build",
+  "command": "/usr/bin/clang -I/Users/nicholaschan/Documents/Projects/Shell/include -g -std=gnu11 -arch arm64 -o CMakeFiles/shell.dir/src/history.c.o -c /Users/nicholaschan/Documents/Projects/Shell/src/history.c",
+  "file": "/Users/nicholaschan/Documents/Projects/Shell/src/history.c",
+  "output": "CMakeFiles/shell.dir/src/history.c.o"
+}
+]

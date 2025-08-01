@@ -1,7 +1,0 @@
-[0.147015, "o", "\u001b[?1l\u001b>"]
-[0.147425, "o", "\u001b[?2004l\r\r\n"]
-[0.147551, "o", "\u001b]2;ls --color=tty -lah\u0007\u001b]1;l\u0007"]
-[0.148865, "o", "total 1.7M\r\ndrwxr-xr-x  4 cmpt201 cmpt201 4.0K Jun 23 14:43 \u001b[0m\u001b[01;34m.\u001b[0m\r\ndrwxr-xr-x 11 cmpt201 cmpt201 4.0K Jun 17 13:47 \u001b[01;34m..\u001b[0m\r\n-rw-r--r--  1 cmpt201 cmpt201 1.1K Jun 20 21:24 history.c\r\n-rw-r--r--  1 cmpt201 cmpt201  13K Jun 23 14:12 main_backup_212pm.c\r\n-rw-r--r--  1 cmpt201 cmpt201  14K Jun 23 14:41 main.c\r\n-rw-r--r--  1 cmpt201 cmpt201  123 Jun 20 17:33 Makefile\r\n-rwxr-xr-x  1 cmpt201 cmpt201 1.5M Jun 20 22:13 \u001b[01;32mmem\u001b[0m\r\ndrwxr-xr-x  2 cmpt201 cmpt201  32K Jun 23 14:41 \u001b[01;34m.nvim\u001b[0m\r\ndrwxr-xr-x  2 cmpt201 cmpt201  68K Jun 23 14:54 \u001b[01;34m.record\u001b[0m\r\n-rwxr-xr-x  1 cmpt201 cmpt201  69K Jun 20 17:38 \u001b[01;32mtest\u001b[0m\r\n-rw-r--r--  1 cmpt201 cmpt201   51 Jun 20 17:38 test.c"]
-[0.148895, "o", "\r\n"]
-[0.149168, "o", "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                               \r \r"]
-[0.149397, "o", "\u001b]2;cmpt201@10360e5d85f7:~/units/04-long-assignments/a8-pnotato/src\u0007\u001b]1;..8-pnotato/src\u0007"]
